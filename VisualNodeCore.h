@@ -25,7 +25,7 @@
 #include "glm/trigonometric.hpp"
 #include "glm/geometric.hpp"
 
-#include "jsoncpp/json/json.h"
+#include "nlohmann/json.hpp"
 
 namespace VisNodeSys
 {

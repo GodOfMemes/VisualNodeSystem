@@ -1,4 +1,6 @@
 #include "VisualNode.h"
+#include <string>
+
 using namespace VisNodeSys;
 
 Node::Node(const std::string ID)
@@ -148,9 +150,9 @@ std::string Node::GetType() const
 	return Type;
 }
 
-Json::Value Node::ToJson()
+nlohmann::ordered_json Node::ToJson()
 {
-	Json::Value result;
+	nlohmann::ordered_json result;
 
 	result["ID"] = ID;
 	result["nodeType"] = Type;
@@ -161,14 +163,14 @@ Json::Value Node::ToJson()
 	result["size"]["y"] = Size.y;
 	result["name"] = Name;
 
-	for (size_t i = 0; i < Input.size(); i++)
+	for(size_t i = 0; i < Input.size(); i++)
 	{
 		result["input"][std::to_string(i)]["ID"] = Input[i]->GetID();
 		result["input"][std::to_string(i)]["name"] = Input[i]->GetName();
 		result["input"][std::to_string(i)]["type"] = Input[i]->GetType();
 	}
-
-	for (size_t i = 0; i < Output.size(); i++)
+	
+	for(size_t i = 0; i < Output.size(); i++)
 	{
 		result["output"][std::to_string(i)]["ID"] = Output[i]->GetID();
 		result["output"][std::to_string(i)]["name"] = Output[i]->GetName();
@@ -178,58 +180,83 @@ Json::Value Node::ToJson()
 	return result;
 }
 
-void Node::FromJson(Json::Value Json)
+void Node::FromJson(nlohmann::ordered_json Json)
 {
-	ID = Json["ID"].asCString();
-	Type = Json["nodeType"].asCString();
-	if (Json.isMember("nodeStyle"))
-		Style = NODE_STYLE(Json["nodeStyle"].asInt());
-	Position.x = Json["position"]["x"].asFloat();
-	Position.y = Json["position"]["y"].asFloat();
-	Size.x = Json["size"]["x"].asFloat();
-	Size.y = Json["size"]["y"].asFloat();
-	Name = Json["name"].asCString();
+	Json.at("ID").get_to(ID);
+	Json.at("nodeType").get_to(Type);
+	if(Json.contains("nodeStyle"))
+		Json.at("nodeStyle").get_to(Style);
 
-	const std::vector<Json::String> InputsList = Json["input"].getMemberNames();
-	for (size_t i = 0; i < Input.size(); i++)
+	Json.at("position").at("x").get_to(Position.x);
+	Json.at("position").at("y").get_to(Position.y);
+
+	Json.at("size").at("x").get_to(Size.x);
+	Json.at("size").at("y").get_to(Size.y);
+
+	Json.at("name").get_to(Name);
+
+	if(Json.contains("input"))
 	{
-		delete Input[i];
-		Input[i] = nullptr;
+		const auto InputsList = Json["input"];
+		for(size_t i = 0; i < Input.size(); i++)
+		{
+			delete Input[i];
+		}
+		Input.resize(InputsList.size());
+
+		for(int i = 0; i < InputsList.size(); i++)
+		{
+			const auto ID = InputsList.at(std::to_string(i)).at("ID").get<std::string>();
+			const auto name = InputsList.at(std::to_string(i)).at("name").get<std::string>();
+
+			// This is a temporary solution for compatibility with old files.
+			std::string type = "FLOAT"; // TODO: Create a better solution.
+			if(InputsList[std::to_string(i)].at("type").type() == nlohmann::json::value_t::string)
+				InputsList[std::to_string(i)]["type"].get_to(type);
+
+			Input[i] = new NodeSocket(this, type, name, false);
+			Input[i]->ID = ID;
+		}
 	}
-	Input.resize(InputsList.size());
-	for (size_t i = 0; i < InputsList.size(); i++)
+	else 
 	{
-		const std::string ID = Json["input"][std::to_string(i)]["ID"].asCString();
-		const std::string name = Json["input"][std::to_string(i)]["name"].asCString();
-
-		// This is a temporary solution for compatibility with old files.
-		std::string type = "FLOAT";
-		if (Json["input"][std::to_string(i)]["type"].type() == Json::stringValue)
-			type = Json["input"][std::to_string(i)]["type"].asCString();
-
-		Input[i] = new NodeSocket(this, type, name, false);
-		Input[i]->ID = ID;
+		for(size_t i = 0; i < Input.size(); i++)
+		{
+			delete Input[i];
+		}
+		Input.clear();
 	}
 
-	const std::vector<Json::String> OutputsList = Json["output"].getMemberNames();
-	for (size_t i = 0; i < Output.size(); i++)
+	if(Json.contains("output"))
 	{
-		delete Output[i];
-		Output[i] = nullptr;
+		const auto OutputLists = Json["output"];
+		for(size_t i = 0; i < Output.size(); i++)
+		{
+			delete Output[i];
+		}
+		Output.resize(OutputLists.size());
+
+		for(int i = 0; i < OutputLists.size(); i++)
+		{
+			const auto ID = OutputLists.at(std::to_string(i)).at("ID").get<std::string>();
+			const auto name = OutputLists.at(std::to_string(i)).at("name").get<std::string>();
+
+			// This is a temporary solution for compatibility with old files.
+			std::string type = "FLOAT"; // TODO: Create a better solution.
+			if(OutputLists[std::to_string(i)].at("type").type() == nlohmann::json::value_t::string)
+				OutputLists[std::to_string(i)]["type"].get_to(type);
+
+			Output[i] = new NodeSocket(this, type, name, true);
+			Output[i]->ID = ID;
+		}
 	}
-	Output.resize(OutputsList.size());
-	for (size_t i = 0; i < OutputsList.size(); i++)
+	else 
 	{
-		const std::string ID = Json["output"][std::to_string(i)]["ID"].asCString();
-		const std::string name = Json["output"][std::to_string(i)]["name"].asCString();
-
-		// This is a temporary solution for compatibility with old files.
-		std::string type = "FLOAT";
-		if (Json["output"][std::to_string(i)]["type"].type() == Json::stringValue)
-			type = Json["output"][std::to_string(i)]["type"].asCString();
-
-		Output[i] = new NodeSocket(this, type, name, true);
-		Output[i]->ID = ID;
+		for(size_t i = 0; i < Output.size(); i++)
+		{
+			delete Output[i];
+		}
+		Output.clear();
 	}
 }
 

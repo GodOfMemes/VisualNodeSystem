@@ -691,16 +691,17 @@ void NodeArea::KeyboardInputUpdate()
 				WasCopiedToClipboard = true;
 
 				const std::string NodesToImport = NODE_CORE.GetClipboardText();
-				Json::Value data;
+				/*Json::Value data;
 
 				JSONCPP_STRING err;
 				const Json::CharReaderBuilder builder;
 
 				const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 				if (!reader->parse(NodesToImport.c_str(), NodesToImport.c_str() + NodesToImport.size(), &data, &err))
-					return;
-
-				NodeArea* NewNodeArea = NodeArea::FromJson(NodesToImport);
+					return;*/
+				
+				nlohmann::json data = nlohmann::json::parse(NodesToImport);
+				NodeArea* NewNodeArea = NodeArea::FromJson(data);
 
 				// ***************** Place new nodes in center of a view space *****************
 				const ImVec2 ViewCenter = GetRenderedViewCenter();

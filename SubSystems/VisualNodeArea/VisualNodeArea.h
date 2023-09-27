@@ -104,9 +104,9 @@ namespace VisNodeSys
 		void SetMainContextMenuFunc(void(*Func)());
 		void PropagateUpdateToConnectedNodes(const Node* CallerNode) const;
 		void SetNodeEventCallback(void(*Func)(Node*, NODE_EVENT));
-		std::string ToJson() const;
+		nlohmann::ordered_json ToJson() const;
 		void SaveToFile(const char* FileName) const;
-		void LoadFromFile(const char* FileName);
+		void LoadFromFile(const std::string& FileName);
 		void SaveNodesToFile(const char* FileName, std::vector<Node*> Nodes);
 		void RunOnEachNode(void(*Func)(Node*));
 		void RunOnEachConnectedNode(Node* StartNode, void(*Func)(Node*));
@@ -131,7 +131,7 @@ namespace VisNodeSys
 		static void CopyNodesInternal(const std::vector<Node*>& SourceNodes, NodeArea* TargetArea, const size_t NodeShift = 0);
 
 		static NodeArea* CreateNodeArea(std::vector<Node*> Nodes, const std::vector<GroupComment*> GroupComments);
-		static NodeArea* FromJson(std::string JsonText);
+		static NodeArea* FromJson(nlohmann::ordered_json json);
 		static void CopyNodesTo(NodeArea* SourceNodeArea, NodeArea* TargetNodeArea);
 		static bool IsNodeIDInList(std::string ID, std::vector<Node*> List);
 		static bool EmptyOrFilledByNulls(const std::vector<Node*> Vector);

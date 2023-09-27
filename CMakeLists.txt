@@ -37,28 +37,22 @@ file(GLOB VisualNodeSystem_SRC
 
 # *************** THIRD_PARTY ***************
 
-# TODO: Replace with nlohmann_json
-file(GLOB jsoncpp_SRC
-	"ThirdParty/jsoncpp/json_reader.cpp"
-	"ThirdParty/jsoncpp/json_tool.h"
-	"ThirdParty/jsoncpp/json_value.cpp"
-	"ThirdParty/jsoncpp/json_valueiterator.inl"
-	"ThirdParty/jsoncpp/json_writer.cpp"
-)
+add_subdirectory(ThirdParty/json)
+add_subdirectory(ThirdParty/glm)
 
 # *************** THIRD_PARTY END ***************
 
 add_library(VisualNodeSystem
 			${VisualNodeSystem_SRC}
 			${VisualNodeArea_SRC}
-			# *************** THIRD_PARTY ***************
-			${jsoncpp_SRC}
 )
 
 source_group("Source Files" FILES ${VisualNodeSystem_SRC})
 source_group("Source Files/SubSystems/VisualNodeArea/" FILES ${VisualNodeArea_SRC})
 # *************** THIRD_PARTY ***************
-source_group("Source Files/ThirdParty/jsoncpp" FILES ${jsoncpp_SRC})
+
+target_link_libraries(VisualNodeSystem PUBLIC nlohmann_json glm::glm)
+target_include_directories(VisualNodeSystem PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(VISUAL_NODE_SYSTEM_THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty)
 
@@ -72,7 +66,6 @@ include_directories(
 	${DEAR_IMGUI_INCLUDE_DIR}
 	${VISUAL_NODE_SYSTEM_THIRDPARTY_DIR}
 )
-
 if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 	set(VISUAL_NODE_SYSTEM_THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty PARENT_SCOPE)
 	set(VISUAL_NODE_SYSTEM_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

@@ -87,8 +87,8 @@ namespace VisNodeSys
 
 		void AddSocket(NodeSocket* Socket);
 
-		virtual Json::Value ToJson();
-		virtual void FromJson(Json::Value Json);
+		virtual nlohmann::ordered_json ToJson();
+		virtual void FromJson(nlohmann::ordered_json Json);
 
 		size_t InputSocketCount() const;
 		size_t OutSocketCount() const;

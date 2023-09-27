@@ -50,9 +50,9 @@ void GroupComment::SetSize(const ImVec2 NewValue)
 
 void GroupComment::Draw() {}
 
-Json::Value GroupComment::ToJson()
+nlohmann::ordered_json GroupComment::ToJson()
 {
-	Json::Value result;
+	nlohmann::ordered_json result;
 
 	result["ID"] = ID;
 	result["position"]["x"] = Position.x;
@@ -69,19 +69,19 @@ Json::Value GroupComment::ToJson()
 	return result;
 }
 
-void GroupComment::FromJson(Json::Value Json)
+void GroupComment::FromJson(nlohmann::ordered_json Json)
 {
-	ID = Json["ID"].asCString();
-	Position.x = Json["position"]["x"].asFloat();
-	Position.y = Json["position"]["y"].asFloat();
-	Size.x = Json["size"]["x"].asFloat();
-	Size.y = Json["size"]["y"].asFloat();
-	Caption = Json["caption"].asCString();
-	bMoveElementsWithComment = Json["bMoveElementsWithComment"].asBool();
-	BackgroundColor.x = Json["BackgroundColor"]["x"].asFloat();
-	BackgroundColor.y = Json["BackgroundColor"]["y"].asFloat();
-	BackgroundColor.z = Json["BackgroundColor"]["z"].asFloat();
-	BackgroundColor.w = Json["BackgroundColor"]["w"].asFloat();
+	Json.at("ID").get_to(ID);
+	Json.at("position").at("x").get_to(Position.x);
+	Json.at("position").at("y").get_to(Position.y);
+	Json.at("size").at("x").get_to(Size.x);
+	Json.at("size").at("y").get_to(Size.y);
+	Json.at("caption").get_to(Caption);
+	Json.at("bMoveElementsWithComment").get_to(bMoveElementsWithComment);
+	Json.at("BackgroundColor").at("x").get_to(BackgroundColor.x);
+	Json.at("BackgroundColor").at("y").get_to(BackgroundColor.y);
+	Json.at("BackgroundColor").at("z").get_to(BackgroundColor.z);
+	Json.at("BackgroundColor").at("w").get_to(BackgroundColor.w);
 }
 
 bool GroupComment::IsHovered() const
