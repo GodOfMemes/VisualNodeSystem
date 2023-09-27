@@ -37,6 +37,7 @@ file(GLOB VisualNodeSystem_SRC
 
 # *************** THIRD_PARTY ***************
 
+# TODO: Replace with nlohmann_json
 file(GLOB jsoncpp_SRC
 	"ThirdParty/jsoncpp/json_reader.cpp"
 	"ThirdParty/jsoncpp/json_tool.h"
@@ -72,5 +73,7 @@ include_directories(
 	${VISUAL_NODE_SYSTEM_THIRDPARTY_DIR}
 )
 
-set(VISUAL_NODE_SYSTEM_THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty PARENT_SCOPE)
-set(VISUAL_NODE_SYSTEM_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+	set(VISUAL_NODE_SYSTEM_THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty PARENT_SCOPE)
+	set(VISUAL_NODE_SYSTEM_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+endif()
