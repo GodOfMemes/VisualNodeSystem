@@ -371,6 +371,24 @@ NodeArea* NodeArea::FromJson(nlohmann::ordered_json json)
 {
 	NodeArea* area = new NodeArea();
 
+	if(json.contains("GroupComments"))
+	{
+		const auto GroupCommentsList = json["GroupComments"];
+		for(size_t i = 0; i < GroupCommentsList.size(); ++i)
+		{
+			GroupComment* NewGroupComment = new GroupComment();
+			NewGroupComment->FromJson(json["GroupComments"].at(std::to_string(i)));
+			area->AddGroupComment(NewGroupComment);
+		}
+	}
+
+	if(json.contains("renderOffset"))
+	{
+		float x = json["renderOffset"].at("x").get<float>();
+		float y = json["renderOffset"].at("y").get<float>();
+		area->SetRenderOffset(ImVec2(x, y));
+	}
+
 	if(!json.contains("nodes"))
 		return area;
 	
@@ -471,24 +489,6 @@ NodeArea* NodeArea::FromJson(nlohmann::ordered_json json)
 				}
 			}
 		}
-	}
-
-	if(json.contains("GroupComments"))
-	{
-		const auto GroupCommentsList = json["GroupComments"];
-		for(size_t i = 0; i < GroupCommentsList.size(); ++i)
-		{
-			GroupComment* NewGroupComment = new GroupComment();
-			NewGroupComment->FromJson(json["GroupComments"].at(std::to_string(i)));
-			area->AddGroupComment(NewGroupComment);
-		}
-	}
-
-	if(json.contains("renderOffset"))
-	{
-		float x = json["renderOffset"].at("x").get<float>();
-		float y = json["renderOffset"].at("y").get<float>();
-		area->SetRenderOffset(ImVec2(x, y));
 	}
 	return area;
 }
